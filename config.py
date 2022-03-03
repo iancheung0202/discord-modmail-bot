@@ -24,7 +24,7 @@ GUILD_ID = 943302660025634836
 CATEGORY_ID = 944841033177497600
 TIMEOUT = 5
 STATUS = "DM me for help"
-TOKEN = "NzMyODk3ODA3NTU1NjI1MDQx.Xw7SRQ.wgSJTcidm4_aRvxuc9HJ0iv5En4"
+TOKEN = "" # Insert your token here
 
 # PLEASE ALSO TYPE THIS TO YOUR TERMINAL: pip install discord-components
 
