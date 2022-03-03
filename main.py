@@ -159,17 +159,17 @@ async def on_message(message):
         return
         
 
-    if True:
-      if isinstance(message.channel, discord.DMChannel):
-        guild = bot.get_guild(config.GUILD_ID)
-        category = bot.get_channel(config.CATEGORY_ID)
-        for channel in category.channels:
-          if str(channel.topic) == str(message.author.id):
-            await message.add_reaction("✅")
+    if True: # I have no idea why I added this, you can delete this lmao
+      if isinstance(message.channel, discord.DMChannel): # Check if message is in DM
+        guild = bot.get_guild(config.GUILD_ID) # Get guild by ID
+        category = bot.get_channel(config.CATEGORY_ID) # Get category that holds all threads by ID
+        for channel in category.channels: # Loop through the existing channel(s) of the category
+          if str(channel.topic) == str(message.author.id): # If the member's thread already exists (which means he already created a thread) - each new thread has a channel description of the thread creator's User ID (check out line 201)
+            await message.add_reaction("✅") # Add checkmark to user's DM
             embed = discord.Embed(title="Incoming message", description=message.content, color=discord.Colour.green())
             embed.set_author(name=f"{message.author.name}#{message.author.discriminator}", icon_url=message.author.avatar_url)
             embed.timestamp = datetime.datetime.utcnow()
-            embed.set_footer(text=f"User ID: {message.author.id}")
+            embed.set_footer(text=f"User ID: {message.author.id}") # Creates the embed of the message sent in the thread
 
             now = datetime.datetime.now()
             today = datetime.date.today()
@@ -177,13 +177,13 @@ async def on_message(message):
             current_time = f"{tdy_date} {now.strftime('%H:%M:%S')}"
             f = open(f"./log/{message.author.name}#{message.author.discriminator}.txt","a+")
             f.write(f"{message.author.name}#{message.author.discriminator} ({message.author.id}) wrote on {current_time}: {message.content}\n\n")
-            f.close()
+            f.close() # Logs the user's message (you can delete the above 7 lines if you like)
 
-            if message.content != "":
-              await channel.send(embed=embed)
+            if message.content != "": # Check if user is sending an empty message (Empty messages might be sole attachments/stickers), if not, then..
+              await channel.send(embed=embed) # Send the above embed message to the thread
 
-            attachments = message.attachments
-            for attachment in attachments:
+            attachments = message.attachments # Get attachments (if there are)
+            for attachment in attachments: # For every attachment there is
               embed = discord.Embed(title="Incoming attachment", description="", color=discord.Colour.green())
               embed.set_author(name=f"{message.author.name}#{message.author.discriminator}", icon_url=message.author.avatar_url)
               embed.set_image(url=attachment.proxy_url)
@@ -192,8 +192,8 @@ async def on_message(message):
               f = open(f"./log/{message.author.name}#{message.author.discriminator}.txt","a+")
               f.write(f"{message.author.name}#{message.author.discriminator} ({message.author.id}) uploaded on {current_time}: {attachment.proxy_url}\n\n")
               f.close()
-              await channel.send(embed=embed)
-            raise Exception()
+              await channel.send(embed=embed) # Send the attachment to the thread
+            raise Exception() # Stop the whole thing to avoid running the code below (that is used to create a NEW thread)
 
         attachments = message.attachments
         if message.content != "":
