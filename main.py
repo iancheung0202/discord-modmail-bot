@@ -16,8 +16,8 @@ DiscordComponents(bot)
 ############ NEW MODMAIL THREAD FUNCTION ############
 
 async def newThread(message, chn, guild):
-  await message.add_reaction("✅")
-  log = bot.get_channel(config.LOG_CHANNEL)
+  await message.add_reaction("✅") # React tick to user's message
+  log = bot.get_channel(config.LOG_CHANNEL) # Get log channel ID (Replace config.LOG_CHANNEL with the channel ID)
   embed = discord.Embed(title="Thread created", description=f"**{message.author.mention} created a new thread!**", color=discord.Colour.green())
   embed.set_author(name=f"{message.author.name}#{message.author.discriminator}", icon_url=message.author.avatar_url)
   embed.timestamp = datetime.datetime.utcnow()
@@ -26,13 +26,14 @@ async def newThread(message, chn, guild):
             style=ButtonStyle.URL,
             label="View thread",
             url=f"https://discord.com/channels/{guild.id}/{chn.id}"
-        )]])
+        )]]) # Send message to log
 
-  member = guild.get_member(int(message.author.id))
-  roles = member.roles
-  roles.reverse()
+  member = guild.get_member(int(message.author.id)) # Get the member who DMed
+  roles = member.roles # Get his/her roles
+  roles.reverse() # Reverse the roles ==> highest to lowest
+  # just getting the details of the user fyi
   joined_at = member.joined_at 
-  since_created = (message.created_at - message.author.created_at).days
+  since_created = (message.created_at - message.author.created_at).days 
   if joined_at is not None:
       since_joined = (message.created_at - joined_at).days
       user_joined = joined_at.strftime("%d %b %Y %H:%M")
@@ -52,7 +53,7 @@ async def newThread(message, chn, guild):
   embed.add_field(name="Account Creation", value=f"{created_on}", inline=True)
   embed.add_field(name="Join Server", value=f"{joined_on}", inline=True)
   embed.add_field(name="Highest Role", value=f"{roles[0].mention}", inline=True)
-  await chn.send(embed=embed)
+  await chn.send(embed=embed) # send new thread msg to channel
 
   creationEmbed = discord.Embed(title="Thread Created!", description=f"Thank you for reaching out to our community team, {message.author.mention}! Your message has been sent to our community team and they will get back to you via this bot! If you realise you no longer need help, please simply click the button below.", color=discord.Colour.gold())
   creationEmbed.set_author(name=f"{bot.user.name}#{bot.user.discriminator}", icon_url=bot.user.avatar_url)
@@ -62,26 +63,30 @@ async def newThread(message, chn, guild):
         style=ButtonStyle.red,
         label="Close thread",
         custom_id="memberClose"
-    )]])
+    )]]) # send a thank you msg to the user in dm
   
   embed = discord.Embed(title="Incoming message", description=message.content, color=discord.Colour.green())
   embed.set_author(name=f"{message.author.name}#{message.author.discriminator}", icon_url=message.author.avatar_url)
   embed.timestamp = datetime.datetime.utcnow()
   embed.set_footer(text=f"User ID: {message.author.id}")
       
+  # LOG #
   now = datetime.datetime.now()
   today = datetime.date.today()
   tdy_date = today.strftime("%B %d, %Y")
   current_time = f"{tdy_date} {now.strftime('%H:%M:%S')}"
   f = open(f"./log/{message.author.name}#{message.author.discriminator}.txt","a+")
   f.write(f"{message.author.name}#{message.author.discriminator} ({message.author.id}) wrote on {current_time}: {message.content}\n\n")
-  f.close()
+  f.close() 
+  
+  # Send msg to new thread
   await chn.send(embed=embed, components=[[Button(
       style=ButtonStyle.grey,
       label="Archive thread",
       custom_id="close"
   )]])
-
+  
+  # If there are attachments, send attachments to thread individually
   for attachment in message.attachments:
     embed = discord.Embed(title="Incoming attachment", description="", color=discord.Colour.green())
     embed.set_author(name=f"{message.author.name}#{message.author.discriminator}", icon_url=message.author.avatar_url)
@@ -194,17 +199,18 @@ async def on_message(message):
               f.close()
               await channel.send(embed=embed) # Send the attachment to the thread
             raise Exception() # Stop the whole thing to avoid running the code below (that is used to create a NEW thread)
-
-        attachments = message.attachments
-        if message.content != "":
-          chn = await guild.create_text_channel(f"{message.author.name}#{message.author.discriminator}", category = category)
+        
+        # If no existing channel is found
+        attachments = message.attachments # First get if there are attachments
+        if message.content != "": # Sending pure stickers like the default wumpus hi stickers: message.content == None
+          chn = await guild.create_text_channel(f"{message.author.name}#{message.author.discriminator}", category = category) # Only if it is NOT a blank msg will the bot create a thread
           await chn.edit(topic=message.author.id)
-          await newThread(message, chn, guild)
+          await newThread(message, chn, guild) # Refer to the newThread function starting from line 18
       
-        elif len(attachments) > 0:
+        elif len(attachments) > 0: # If the user only sent ATTACHMENTS, that would be a blank message too, but we want to it to be sent to us, right?
           chn = await guild.create_text_channel(f"{message.author.name}#{message.author.discriminator}", category = category)
           await chn.edit(topic=message.author.id)
-          await newThread(message, chn, guild)
+          await newThread(message, chn, guild) # Refer to the newThread function starting from line 18
     else:
       pass
 
